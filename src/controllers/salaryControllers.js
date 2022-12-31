@@ -1,5 +1,5 @@
 const Employee = require("../models/employees");
-const Salary = require("../models/Salaries");
+const Salary = require("../models/salaries");
 const moment = require("moment");
 exports.createSalary = async (req, res, next) => {
   try {
