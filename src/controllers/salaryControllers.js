@@ -11,10 +11,9 @@ exports.createSalary = async (req, res, next) => {
       Employee,
       PayrollPeriod: {
         $gte: moment(PayrollPeriod).startOf("year"),
-        $lte: moment(PayrollPeriod),
+        $lte: moment(PayrollPeriod).endOf("year"),
       },
     });
-    console.log(Salaries);
     //validate
     Salaries.map((item) => {
       if (moment(item.PayrollPeriod).year() === moment(PayrollPeriod).year()) {
@@ -52,14 +51,29 @@ exports.createSalary = async (req, res, next) => {
         NetIncome: TotalEarnings - TotalDeductions,
         YTDearnings:
           TotalEarnings +
-          Salaries.reduce((sum, item) => sum + item.Totals.TotalEarnings, 0),
+          Salaries.reduce(
+            (sum, item) =>
+              moment(item.PayrollPeriod).isBefore(moment(PayrollPeriod))
+                ? sum + item.Totals.TotalEarnings
+                : sum,
+            0
+          ),
         YTDIncomeTaxs:
           (+Deductions?.IncomeTax || 0) +
-          Salaries.reduce((sum, item) => sum + item.Deductions.IncomeTax, 0),
+          Salaries.reduce(
+            (sum, item) =>
+              moment(item.PayrollPeriod).isBefore(moment(PayrollPeriod))
+                ? sum + item.Deductions.IncomeTax
+                : sum,
+            0
+          ),
         AccumulatedSSF:
           (+Deductions?.SocialSecurityFund || 0) +
           Salaries.reduce(
-            (sum, item) => sum + item.Deductions.SocialSecurityFund,
+            (sum, item) =>
+              moment(item.PayrollPeriod).isBefore(moment(PayrollPeriod))
+                ? sum + item.Deductions.SocialSecurityFund
+                : sum,
             0
           ),
       },
@@ -100,7 +114,7 @@ exports.deleteOneSalary = async (req, res, next) => {
     //request
     const { eid } = req.params;
 
-    const Salaries = await Salary.deleteById(eid);
+    const Salaries = await Salary.deleteOne({ _id: eid });
 
     res.status(200).json({ message: "done" });
   } catch (err) {
