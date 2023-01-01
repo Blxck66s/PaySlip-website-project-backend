@@ -1,4 +1,3 @@
-const Employee = require("../models/employees");
 const Salary = require("../models/salaries");
 const moment = require("moment");
 exports.createSalary = async (req, res, next) => {
@@ -12,10 +11,10 @@ exports.createSalary = async (req, res, next) => {
       Employee,
       PayrollPeriod: {
         $gte: moment(PayrollPeriod).startOf("year"),
-        $lte: moment(PayrollPeriod).endOf("year"),
+        $lte: moment(PayrollPeriod),
       },
     });
-
+    console.log(Salaries);
     //validate
     Salaries.map((item) => {
       if (moment(item.PayrollPeriod).year() === moment(PayrollPeriod).year()) {
@@ -68,7 +67,7 @@ exports.createSalary = async (req, res, next) => {
     const newSalary = await salary.save();
 
     //response
-    res.status(201).json({ newSalary });
+    res.status(201).json({ message: "done" });
   } catch (err) {
     next(err);
   }
@@ -96,11 +95,15 @@ exports.getSpecificEmployeeSalaries = async (req, res, next) => {
   }
 };
 
-// exports.getSalaries = async (req, res, next) => {
-//   try {
-//     const Salaries = await Salary.find().populate("Employee");
-//     res.status(200).json({ Salaries });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+exports.deleteOneSalary = async (req, res, next) => {
+  try {
+    //request
+    const { eid } = req.params;
+
+    const Salaries = await Salary.deleteById(eid);
+
+    res.status(200).json({ message: "done" });
+  } catch (err) {
+    next(err);
+  }
+};

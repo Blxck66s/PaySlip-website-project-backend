@@ -25,6 +25,12 @@ module.exports = async (req, res, next) => {
     if (!authorizedUser) {
       throw new Error("unauthenticated");
     }
+
+    //validate admin status
+    if (authorizedUser.admin === false) {
+      throw new Error("unauthorized");
+    }
+
     //pass to another api request
     req.user = authorizedUser;
     next();

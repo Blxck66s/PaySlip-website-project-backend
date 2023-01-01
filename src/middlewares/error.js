@@ -1,6 +1,6 @@
 module.exports = (err, req, res, next) => {
   console.log(err);
-  if (err.message === "unauthenticated") {
+  if (err.message === "unauthenticated" || err.message === "unauthorized") {
     err.message = err.message + " : none shall pass !!~";
     err.statusCode = 401;
   }
